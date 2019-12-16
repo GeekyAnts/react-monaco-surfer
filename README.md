@@ -173,3 +173,21 @@ All below mentioned properties are required except addActionButtons and highligh
 
   - codeBit: Gives object for selected codeBit
   - codeBitPath: Gives path for selected codeBit
+
+## Required CSS classes
+
+```
+.dull{
+  // any styles for un-highlighted text
+  opacity: 0.4;
+}
+```
+
+and
+
+```
+.selected-component{
+  // any styles for highlighted text
+  opacity: 1;
+}
+```

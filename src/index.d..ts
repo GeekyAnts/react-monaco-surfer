@@ -1,26 +1,11 @@
-import { MonacoEditorBaseProps } from 'react-monaco-editor/src/index';
+import { MonacoEditorProps } from 'react-monaco-editor/src/index';
 
 export interface CodeBit {
   start: string;
   end: string;
   children: Array<CodeBit> | string;
 }
-export interface ActionButtons {
-  caption: string;
-  onclick: () => void;
-}
 
-export interface MonacoSurferPropTypes {
-  codeBits: CodeBit;
-  highlightedCodePath?: string | null | undefined;
-  highlightOnly: boolean;
-  onClickBit: (codeBit: any, path: string) => void;
-  reactMonacoProps: MonacoEditorBaseProps;
-  addActionButtons?: (
-    codeBit: CodeBit | string,
-    highlightedCodePath: string
-  ) => Array<ActionButtons>;
-}
 export interface MappingDetails {
   lineNumber: number;
   columnNumber: number;
@@ -35,4 +20,43 @@ export interface MapType {
   start?: boolean;
   end?: boolean;
   children?: boolean;
+}
+
+export interface MonacoSurferPropTypes {
+  /*
+    Add code value in above mentioned format 
+  */
+  codeBits: CodeBit;
+
+  /*
+    Mention the path to code-bit to highlight it (give undefined for no highlighting)
+  */
+  highlightedCodePath?: string | null | undefined;
+
+  /*
+    Boolean to prevent revealPositionInCenter, if not required
+  */
+  highlightOnly: boolean;
+
+  /*
+    Handle clicks on any part of the code
+      - codeBit: Gives object for selected codeBit
+      - codeBitPath: Gives path for selected codeBit
+  */
+  onClickBit: (codeBit: CodeBit | string, codeBitPath: string) => void;
+
+  /*
+    Add all props of react-monaco-editor here
+  */
+  reactMonacoProps: MonacoEditorProps;
+
+  /*
+    Handle adding action buttons on selected part of the code
+      - codeBit: Gives object for selected codeBit
+      - codeBitPath: Gives path for selected codeBit
+  */
+  addActionButtons?: (
+    codeBit: CodeBit | string,
+    codeBitPath: string
+  ) => React.ElementType<any> | null;
 }

@@ -1,19 +1,22 @@
-import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import MonacoSurfer from '../.';
 import * as SurferTypes from '../dist/index.d.';
 import './index.css';
 import CodeBits from './codeBits';
+import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';
 
-const editorWillMount = (editor: any, monaco: any) => {
+const editorWillMount = (monaco: typeof monacoEditorTypes) => {
   // Handle editor starts mounting here!!
-  // console.log('editorWillMount', editor, monaco);
+  // console.log('editorWillMount', monaco);
 };
 
-const onChange = (newValue: any, event: any) => {
+const onChange = (
+  newValue: string,
+  event: monacoEditorTypes.editor.IModelContentChangedEvent
+) => {
   // Handle on text changed in editor!!
-  // console.log('onChange', e);
+  // console.log('onChange', newValue, event);
 };
 
 class App extends React.Component {
@@ -24,7 +27,11 @@ class App extends React.Component {
 
   // Must to handle(helps stop re-rendering of text-editor if editing text in editor)
   shouldComponentUpdate(nextProps, nextState) {
-    if (JSON.stringify(nextState) === JSON.stringify(this.state)) return false;
+    if (
+      JSON.stringify(nextState) === JSON.stringify(this.state) &&
+      JSON.stringify(nextProps) === JSON.stringify(this.props)
+    )
+      return false;
     return true;
   }
   render() {
@@ -33,31 +40,51 @@ class App extends React.Component {
         codeBits={CodeBits}
         highlightedCodePath={this.state.highlightedCodePath}
         highlightOnly={this.state.highlightOnly}
-        onClickBit={(object: any, path: string) => {
-          // Handle clicks on any part of the code
-          this.setState({ highlightedCodePath: path, highlightOnly: true });
+        onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
+          // console.log(codeBit, '##');
+          this.setState({
+            highlightedCodePath: codeBitPath,
+            highlightOnly: true,
+          });
         }}
         addActionButtons={(
           codeBit: SurferTypes.CodeBit,
           codeBitPath: string
         ) => {
-          console.log(codeBit);
+          // console.log(codeBit, '$$');
           if (codeBitPath === 'CodeBit.children.0.children.0')
-            return [
-              {
-                caption: 'Export as component',
-                onclick: () => {
-                  console.log('export as component');
-                },
-              },
-              {
-                caption: 'Refractor',
-                onclick: () => {
-                  console.log('refractor');
-                },
-              },
-            ];
-          return [];
+            return () => (
+              <div
+                style={{
+                  backgroundColor: 'grey',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  height: '50px',
+                  width: '300px',
+                }}
+              >
+                <button
+                  onClick={() => {
+                    console.log('export as component');
+                  }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                  }}
+                >
+                  <text>Export as component</text>
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('refractor');
+                  }}
+                  style={{ width: '100%', height: '100%' }}
+                >
+                  <text>Refractor</text>
+                </button>
+              </div>
+            );
+          return null;
         }}
         reactMonacoProps={{
           // All React-Monaco-Editor props can be given here to override default's

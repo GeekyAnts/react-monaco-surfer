@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
+import * as ReactDOM from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
 import { Range } from 'monaco-editor';
 import map from 'lodash/map';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
-import {
-  MonacoSurferPropTypes,
-  MapObject,
-  CodeBit,
-  MapType,
-  ActionButtons,
-} from './index.d.';
+import { MonacoSurferPropTypes, MapObject, CodeBit, MapType } from './index.d.';
 import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';
 import MonacoEditorTypes from 'react-monaco-editor/src/index';
 
@@ -18,6 +13,7 @@ const options = {
   selectOnLineNumbers: true,
   fontSize: 30,
   language: 'javascript',
+  readOnly: true,
 };
 
 export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
@@ -26,11 +22,14 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
   monacoRef?: MonacoEditorTypes | null;
   contentWidgetDomNode?: HTMLElement;
   decorationId: Array<string> = [];
+  activeContentWidget:
+    | monacoEditorTypes.editor.IContentWidget
+    | undefined = undefined;
   codeBitsMap: Map<string, MapObject> = new Map<string, MapObject>();
   reverseCodeBitsMap: Array<Array<string>> = new Array<Array<string>>();
 
   componentDidMount() {
-    const { highlightedCodePath, onClickBit } = this.props;
+    const { highlightedCodePath, onClickBit, codeBits } = this.props;
     if (highlightedCodePath) {
       this.highlightAndScroll(highlightedCodePath);
     }
@@ -39,8 +38,21 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         (
           positionProps: monacoEditorTypes.editor.ICursorPositionChangedEvent
         ) => {
+          const path = this.reverseCodeBitsMap[
+            positionProps.position.lineNumber
+          ][positionProps.position.column - 1];
+
+          let extractedBit: CodeBit;
+
+          const codePathForBitExtraction: Array<string> = path.split('.');
+          codePathForBitExtraction.shift();
+
+          if (!codePathForBitExtraction.length) extractedBit = codeBits;
+          else
+            extractedBit = get(codeBits, codePathForBitExtraction, 'NOT_FOUND');
+
           onClickBit(
-            {},
+            extractedBit,
             this.reverseCodeBitsMap[positionProps.position.lineNumber][
               positionProps.position.column - 1
             ]
@@ -152,6 +164,10 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
       if (!contentBitMapValue) return;
 
+      // Remove previously existing widget
+      if (this.activeContentWidget)
+        this.monacoRef.editor.removeContentWidget(this.activeContentWidget);
+
       // Reveals code in center of screen
       if (!highlightOnly)
         this.monacoRef.editor.revealPositionInCenter({
@@ -169,18 +185,15 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       if (!codePathForBitExtraction.length) extractedBit = codeBits;
       else extractedBit = get(codeBits, codePathForBitExtraction, 'NOT_FOUND');
 
-      const buttonsArray = addActionButtons
-        ? addActionButtons(extractedBit, highlightedCodePath)
-        : [];
+      const actionButtons = addActionButtons
+        ? this.getContentWidget(
+            contentBitMapValue,
+            addActionButtons(extractedBit, highlightedCodePath)
+          )
+        : null;
 
-      // Remove previously existing widget
-      this.monacoRef.editor.removeContentWidget(
-        this.getContentWidget(contentBitMapValue, buttonsArray)
-      );
-      if (buttonsArray.length) {
-        this.monacoRef.editor.addContentWidget(
-          this.getContentWidget(contentBitMapValue, buttonsArray)
-        );
+      if (actionButtons) {
+        this.monacoRef.editor.addContentWidget(actionButtons);
       }
 
       // Gives api's for editor info
@@ -223,49 +236,38 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
 
   getContentWidget = (
     contentBitMapValue: MapObject,
-    buttonsArray: Array<ActionButtons>
+    MyButtonWidget: React.ElementType<any> | null
   ) => {
-    const contentWidget: monacoEditorTypes.editor.IContentWidget = {
-      getId: function() {
-        return 'my.content.widget';
-      },
-      getDomNode: () => {
-        if (!this.contentWidgetDomNode) {
-          var newDomNode = document.createElement('div');
-
-          map(buttonsArray, (button: ActionButtons) => {
-            var myButton: HTMLElement = document.createElement('BUTTON');
-            myButton.onclick = button.onclick;
-            myButton.appendChild(document.createTextNode(button.caption));
-            myButton.style.height = '100%';
-            myButton.style.width = '100%';
-            newDomNode.appendChild(myButton);
-          });
-
-          newDomNode.style.background = 'grey';
-          newDomNode.style.width = '300px';
-          newDomNode.style.height = '50px';
-          newDomNode.style.display = 'flex';
-          newDomNode.style.flexDirection = 'row';
-
-          this.contentWidgetDomNode = newDomNode;
-        }
-        return this.contentWidgetDomNode;
-      },
-      getPosition: function() {
-        return {
-          position: {
-            lineNumber: contentBitMapValue.start.lineNumber,
-            column: contentBitMapValue.start.columnNumber + 1,
-          },
-          preference: [
-            monacoEditorTypes.editor.ContentWidgetPositionPreference.ABOVE,
-            monacoEditorTypes.editor.ContentWidgetPositionPreference.BELOW,
-          ],
-        };
-      },
-    };
-    return contentWidget;
+    if (MyButtonWidget) {
+      const contentWidget: monacoEditorTypes.editor.IContentWidget = {
+        getId: function() {
+          return 'my.content.widget';
+        },
+        getDomNode: () => {
+          if (!this.contentWidgetDomNode) {
+            var newDomNode = document.createElement('div');
+            ReactDOM.hydrate(<MyButtonWidget />, newDomNode);
+            this.contentWidgetDomNode = newDomNode;
+          }
+          return this.contentWidgetDomNode;
+        },
+        getPosition: function() {
+          return {
+            position: {
+              lineNumber: contentBitMapValue.start.lineNumber,
+              column: contentBitMapValue.start.columnNumber + 1,
+            },
+            preference: [
+              monacoEditorTypes.editor.ContentWidgetPositionPreference.ABOVE,
+              monacoEditorTypes.editor.ContentWidgetPositionPreference.BELOW,
+            ],
+          };
+        },
+      };
+      this.activeContentWidget = contentWidget;
+      return contentWidget;
+    }
+    return null;
   };
 
   render() {

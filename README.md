@@ -1,167 +1,122 @@
-# TSDX React User Guide
+# React-Monaco-Surfer
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with TSDX. Let’s get you oriented with what’s here and how to use it.
+A wrapper around [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) for Code Surfing.
 
-> This TSDX setup is meant for developing React components (not apps!) that can be published to NPM. If you’re looking to build an app, you should use `create-react-app`, `razzle`, `nextjs`, `gatsby`, or `react-static`.
+> This wrapper helps you add your code to the [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) in a particular format to provide you some pre-build features such as highlighting some part of the code or adding buttons to some part of the text when selected. Also you can track the movement of the cursor in the editor to handle it accordingly
 
-> If you’re new to TypeScript and React, checkout [this handy cheatsheet](https://github.com/sw-yx/react-typescript-cheatsheet/)
+> All the features provided by [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) remain intact and can be passed in reactMonacoProps.
 
-## Commands
-
-TSDX scaffolds your new library inside `/src`, and also sets up a [Parcel-based](https://parceljs.org) playground for it inside `/example`.
-
-The recommended workflow is to run TSDX in one terminal:
+## Installation
 
 ```
-npm start # or yarn start
+npm install react-monaco-surfer
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
-
-Then run the example inside another:
+or
 
 ```
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
+yarn add react-monaco-surfer
 ```
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**, [we use Parcel's aliasing](https://github.com/palmerhq/tsdx/pull/88/files).
+## Using
 
-To do a one-off build, use `npm run build` or `yarn build`.
-
-To run tests, use `npm test` or `yarn test`.
-
-## Configuration
-
-Code quality is [set up for you](https://github.com/palmerhq/tsdx/pull/45/files) with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
-
-### Jest
-
-Jest tests are set up to run with `npm test` or `yarn test`. This runs the test watcher (Jest) in an interactive mode. By default, runs tests related to files changed since the last commit.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
+App.ts (check examples folder for better understanding)
 
 ```
-/example
-  index.html
-  index.tsx       # test your component here in a demo app
-  package.json
-  tsconfig.json
-/src
-  index.tsx       # EDIT THIS
-/test
-  blah.test.tsx   # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
-```
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import MonacoSurfer from 'react-monaco-surfer';
+import * as SurferTypes from 'react-monaco-surfer/dist/index.d.';
+import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';
 
-#### React Testing Library
+// Mention styles for highlighted text and remaining text in this.
+import './index.css';
 
-We do not set up `react-testing-library` for you yet, we welcome contributions and documentation on this.
+const editorWillMount = (monaco: typeof monacoEditorTypes) => {
+  // Handle editor starts mounting here!!
+  console.log('editorWillMount', monaco);
+};
 
-### Rollup
+const onChange = (
+  newValue: string,
+  event: monacoEditorTypes.editor.IModelContentChangedEvent
+) => {
+  // Handle on text changed in editor!!
+  console.log('onChange', newValue, event);
+};
 
-TSDX uses [Rollup v1.x](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
+class App extends React.Component {
+  state = {
+    highlightedCodePath: undefined,
+    highlightOnly: false,
+  };
 
-### TypeScript
+  shouldComponentUpdate(nextProps, nextState) {
+    if (
+      JSON.stringify(nextState) === JSON.stringify(this.state) &&
+      JSON.stringify(nextProps) === JSON.stringify(this.props)
+    )
+      return false;
+    return true;
+  }
 
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
+  render() {
+    return (
+      <MonacoSurfer
+        codeBits={CodeBits}
+        highlightedCodePath={this.state.highlightedCodePath}
+        highlightOnly={this.state.highlightOnly}
 
-## Continuous Integration
-
-### Travis
-
-_to be completed_
-
-### Circle
-
-_to be completed_
-
-## Optimizations
-
-Please see the main `tsdx` [optimizations docs](https://github.com/palmerhq/tsdx#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+        onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
+          this.setState({
+            highlightedCodePath: codeBitPath,
+            highlightOnly: true,
+          });
+        }}
+        addActionButtons={(
+          codeBit: SurferTypes.CodeBit,
+          codeBitPath: string
+        ) => {
+          return ()=>(
+            <div>
+              <text>
+                Action Buttons
+              </text>
+            </div>
+          );
+        }}
+        reactMonacoProps={{
+          width:'100%',
+          height:'100%',
+          onChange: onChange,
+          editorWillMount: editorWillMount,
+        }}
+      ></MonacoSurfer>
+    );
+  }
 }
-```
 
-You can also choose to install and use [invariant](https://github.com/palmerhq/tsdx#invariant) and [warning](https://github.com/palmerhq/tsdx#warning) functions.
-
-## Module Formats
-
-CJS, ESModules, and UMD module formats are supported.
-
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Using the Playground
+ReactDOM.render(<App />, document.getElementById('root'));
 
 ```
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
-```
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure TSDX is running in watch mode like we recommend above. **No symlinking required**!
+## Properties
 
-## Deploying the Playground
+All below mentioned properties are required except addActionButtons and highlightedCodePath
 
-The Playground is just a simple [Parcel](https://parceljs.org) app, you can deploy it anywhere you would normally deploy that. Here are some guidelines for **manually** deploying with the Netlify CLI (`npm i -g netlify-cli`):
+- `codeBits` Object in the format CodeBit(check `src/index.d.ts` for better understanding).
 
-```bash
-cd example # if not already in the example folder
-npm run build # builds to dist
-netlify deploy # deploy the dist folder
-```
+- `highlightedCodePath` Mention the path to code-bit to highlight it (give `undefined`for no highlighting).
 
-Alternatively, if you already have a git repo connected, you can set up continuous deployment with Netlify:
+- `highlightOnly` Boolean to prevent revealPositionInCenter, if not required.
 
-```bash
-netlify init
-# build command: yarn build && cd example && yarn && yarn build
-# directory to deploy: example/dist
-# pick yes for netlify.toml
-```
+- `onClickBit` Handle clicks on any part of the code
 
-## Named Exports
+  - codeBit: Gives object for selected codeBit
+  - codeBitPath: Gives path for selected codeBit
 
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
+- `reactMonacoProps` Can add all props of react-monaco-editor here.
 
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. TSDX has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using https://github.com/sindresorhus/np.
-
-## Usage with Lerna
-
-When creating a new package with TSDX within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
-
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
-
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
-
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
-   },
-```
-
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/palmerhq/tsdx/issues/64)
+- `addActionButtons` Handle adding action buttons on selected part of the code
+  - codeBit: Gives object for selected codeBit
+  - codeBitPath: Gives path for selected codeBit

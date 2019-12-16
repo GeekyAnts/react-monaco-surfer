@@ -1,0 +1,10 @@
+/*
+    Don't forget to keep the dull class above the selected-component class
+*/
+
+.dull {
+  opacity: 0.4;
+}
+.selected-component {
+  opacity: 1;
+}

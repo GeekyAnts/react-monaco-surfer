@@ -54,33 +54,22 @@ class App extends React.Component {
           // console.log(codeBit, '$$');
           if (codeBitPath === 'CodeBit.children.0.children.0')
             return () => (
-              <div
-                style={{
-                  backgroundColor: 'grey',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  height: '50px',
-                  width: '300px',
-                }}
-              >
+              <div className="btn-container">
                 <button
                   onClick={() => {
                     console.log('export as component');
                   }}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                  }}
+                  className="action-btn"
                 >
-                  <text>Export as component</text>
+                  <text className="btn-text">Export</text>
                 </button>
                 <button
                   onClick={() => {
                     console.log('refractor');
                   }}
-                  style={{ width: '100%', height: '100%' }}
+                  className="action-btn-right"
                 >
-                  <text>Refractor</text>
+                  <text className="btn-text">Refractor</text>
                 </button>
               </div>
             );

@@ -6,6 +6,8 @@ A wrapper around [react-monaco-editor](https://github.com/react-monaco-editor/re
 
 > All the features provided by [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) remain intact and can be passed in reactMonacoProps.
 
+![](react-monaco-surfer.gif)
+
 ## Installation
 
 ```

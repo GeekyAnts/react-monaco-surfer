@@ -28,6 +28,7 @@ import * as ReactDOM from 'react-dom';
 import MonacoSurfer from 'react-monaco-surfer';
 import * as SurferTypes from 'react-monaco-surfer/dist/index.d.';
 import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';
+import CodeBits from './codeBits';
 
 // Mention styles for highlighted text and remaining text in this.
 import './index.css';
@@ -66,7 +67,6 @@ class App extends React.Component {
         codeBits={CodeBits}
         highlightedCodePath={this.state.highlightedCodePath}
         highlightOnly={this.state.highlightOnly}
-
         onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
           this.setState({
             highlightedCodePath: codeBitPath,
@@ -100,17 +100,68 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 ```
 
+codeBits.ts
+
+```
+export default {
+  start: '<View>\n',
+  end: '</View>\n',
+  children: [
+    {
+      start: '\t<View>\n',
+      end: '\t</View>\n',
+      children: [
+        {
+          start: '\t\t<View>\n',
+          end: '\t\t</View>\n',
+          children: [
+            {
+              start: '\t\t\t<Text>',
+              end: '\t\t\t</Text>\n',
+              children: [
+                {
+                  start: '',
+                  end: '',
+                  children: '\t\t\t\tEnter some text here',
+                },
+              ],
+            },
+            {
+              start: '\t\t\t<Text>\n',
+              end: '\t\t\t</Text>\n',
+              children: '\t\t\t\tEnter some text here\n',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      start: '\t<View>\n',
+      end: '\t</View>\n',
+      children: [
+        {
+          start: '\t\t<Text>\n',
+          end: '\t\t</Text>\n',
+          children: '\t\t\tSome other text here\n',
+        },
+      ],
+    },
+  ],
+};
+```
+
 ## Properties
 
 All below mentioned properties are required except addActionButtons and highlightedCodePath
 
-- `codeBits` Object in the format CodeBit(check `src/index.d.ts` for better understanding).
+- `codeBits` Object in the format CodeBit (check `src/index.d.ts` for better understanding).
 
 - `highlightedCodePath` Mention the path to code-bit to highlight it (give `undefined`for no highlighting).
 
 - `highlightOnly` Boolean to prevent revealPositionInCenter, if not required.
 
 - `onClickBit` Handle clicks on any part of the code
+  `Params`
 
   - codeBit: Gives object for selected codeBit
   - codeBitPath: Gives path for selected codeBit
@@ -118,5 +169,7 @@ All below mentioned properties are required except addActionButtons and highligh
 - `reactMonacoProps` Can add all props of react-monaco-editor here.
 
 - `addActionButtons` Handle adding action buttons on selected part of the code
+  `Params`
+
   - codeBit: Gives object for selected codeBit
   - codeBitPath: Gives path for selected codeBit

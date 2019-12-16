@@ -41,8 +41,5 @@ export default {
         },
       ],
     },
-    // {
-    //   children: 'jknsaldasd',
-    // },
   ],
 };

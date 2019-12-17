@@ -1,6 +1,6 @@
 {
   "name": "react-monaco-surfer",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "author": "Chandan | BuilderX",
   "main": "dist/index.js",

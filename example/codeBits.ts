@@ -32,14 +32,14 @@ export default {
                     {
                       start: '',
                       end: '',
-                      children: ['\n\t\t\t\tEnter some text here\n\t\t\t'],
+                      children: ['Enter some text here'],
                     },
                   ],
                 },
                 {
                   start: '\t\t\t<Text>\n',
                   end: '\t\t\t</Text>\n',
-                  children: ['\t\t\t\tEnter some text here\n'],
+                  children: '\t\t\t\tEnter some text here\n',
                 },
               ],
             },

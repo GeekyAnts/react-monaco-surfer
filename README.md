@@ -20,9 +20,14 @@ or
 yarn add react-monaco-surfer
 ```
 
-## Using
+## Peer Dependencies
 
-> We are using [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) as a peer dependencies. So, please `ENSURE` that you have [monaco-editor](https://github.com/microsoft/monaco-editor) and [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) to your project properly as specified in the respective docs before starting with `react-monaco-surfer`.
+- [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor)
+- [monaco-editor](https://github.com/microsoft/monaco-editor)
+
+Please `MAKE SURE` to add these to your project before starting with `react-monaco-surfer`.
+
+## Usage
 
 `App.ts`(check examples folder for better understanding)
 
@@ -158,21 +163,20 @@ All below mentioned properties are required except addActionButtons and highligh
 
 - `codeBits` Object in the format CodeBit (check `src/index.d.ts` for better understanding).
 
-- `highlightedCodePath` Mention the path to code-bit to highlight it (give `undefined`for no highlighting).
+- `highlightedCodePath` Mention the path to code-bit to highlight it (give `undefined` for no highlighting).
 
 - `highlightOnly` Boolean to prevent revealPositionInCenter, if not required.
 
 - `onClickBit` Handle clicks on any part of the code
-  `Params`
+  `Params :`
 
   - codeBit: Gives object for selected codeBit
   - codeBitPath: Gives path for selected codeBit
 
 - `reactMonacoProps` Can add all props of react-monaco-editor here.
 
-- `addActionButtons` Handle adding action buttons on selected part of the code
-  `Params`
-
+- `addActionButtons` Handle adding action buttons on selected part of the code.
+  `Params :`
   - codeBit: Gives object for selected codeBit
   - codeBitPath: Gives path for selected codeBit
 
@@ -193,6 +197,20 @@ and
   opacity: 1;
 }
 ```
+
+## Development Setup
+
+```
+git clone https://github.com/GeekyAnts/react-monaco-surfer.git
+cd react-monaco-surfer
+yarn
+yarn start
+cd examples
+yarn
+yarn start
+```
+
+This way you can make changes in the root folder(react-monaco-surfer) and test your changes on the project in examples folder.
 
 ## Maintainers
 

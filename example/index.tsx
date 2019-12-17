@@ -19,7 +19,10 @@ const onChange = (
 
 class App extends React.Component {
   state = {
-    highlightedCodePath: undefined,
+    highlightedCodePath: [
+      'CodeBit.children.1.children.0.children.0',
+      'CodeBit.children.1.children.1.children.0',
+    ],
     highlightOnly: false,
   };
 
@@ -38,7 +41,6 @@ class App extends React.Component {
         highlightedCodePaths={this.state.highlightedCodePath}
         highlightOnly={this.state.highlightOnly}
         onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
-          console.log(codeBit);
           this.setState({
             highlightedCodePath: [codeBitPath],
             highlightOnly: true,
@@ -48,7 +50,10 @@ class App extends React.Component {
           codeBit: SurferTypes.CodeBit,
           codeBitPath: string
         ) => {
-          if (codeBitPath === 'CodeBit.children.0.children.0')
+          if (
+            codeBitPath === 'CodeBit.children.1.children.0.children.0' ||
+            codeBitPath === 'CodeBit.children.1.children.1.children.0'
+          )
             return () => (
               <div className="btn-container">
                 <button onClick={() => {}} className="action-btn">

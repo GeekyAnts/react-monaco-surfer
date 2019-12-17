@@ -3,7 +3,7 @@ import { MonacoEditorProps } from 'react-monaco-editor/src/index';
 export interface CodeBit {
   start: string;
   end: string;
-  children: Array<CodeBit> | string;
+  children: Array<CodeBit | string> | string;
 }
 
 export interface MappingDetails {
@@ -31,7 +31,7 @@ export interface MonacoSurferPropTypes {
   /*
     Mention the path to code-bit to highlight it (give undefined for no highlighting)
   */
-  highlightedCodePath?: string | null | undefined;
+  highlightedCodePaths?: Array<string> | string | null | undefined;
 
   /*
     Boolean to prevent revealPositionInCenter, if not required

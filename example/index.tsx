@@ -8,7 +8,6 @@ import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';
 
 const editorWillMount = (monaco: typeof monacoEditorTypes) => {
   // Handle editor starts mounting here!!
-  // console.log('editorWillMount', monaco);
 };
 
 const onChange = (
@@ -16,7 +15,6 @@ const onChange = (
   event: monacoEditorTypes.editor.IModelContentChangedEvent
 ) => {
   // Handle on text changed in editor!!
-  // console.log('onChange', newValue, event);
 };
 
 class App extends React.Component {
@@ -25,7 +23,6 @@ class App extends React.Component {
     highlightOnly: false,
   };
 
-  // Must to handle(helps stop re-rendering of text-editor if editing text in editor)
   shouldComponentUpdate(nextProps, nextState) {
     if (
       JSON.stringify(nextState) === JSON.stringify(this.state) &&
@@ -38,12 +35,12 @@ class App extends React.Component {
     return (
       <MonacoSurfer
         codeBits={CodeBits}
-        highlightedCodePath={this.state.highlightedCodePath}
+        highlightedCodePaths={this.state.highlightedCodePath}
         highlightOnly={this.state.highlightOnly}
         onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
-          // console.log(codeBit, '##');
+          console.log(codeBit);
           this.setState({
-            highlightedCodePath: codeBitPath,
+            highlightedCodePath: [codeBitPath],
             highlightOnly: true,
           });
         }}
@@ -51,24 +48,13 @@ class App extends React.Component {
           codeBit: SurferTypes.CodeBit,
           codeBitPath: string
         ) => {
-          // console.log(codeBit, '$$');
           if (codeBitPath === 'CodeBit.children.0.children.0')
             return () => (
               <div className="btn-container">
-                <button
-                  onClick={() => {
-                    console.log('export as component');
-                  }}
-                  className="action-btn"
-                >
+                <button onClick={() => {}} className="action-btn">
                   <text className="btn-text">Export</text>
                 </button>
-                <button
-                  onClick={() => {
-                    console.log('refractor');
-                  }}
-                  className="action-btn-right"
-                >
+                <button onClick={() => {}} className="action-btn-right">
                   <text className="btn-text">Refractor</text>
                 </button>
               </div>
@@ -76,7 +62,6 @@ class App extends React.Component {
           return null;
         }}
         reactMonacoProps={{
-          // All React-Monaco-Editor props can be given here to override default's
           onChange: onChange,
           editorWillMount: editorWillMount,
           width: '100%',

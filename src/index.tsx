@@ -22,16 +22,14 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
   monacoRef?: MonacoEditorTypes | null;
   contentWidgetDomNode?: HTMLElement;
   decorationId: Array<string> = [];
-  activeContentWidget:
-    | monacoEditorTypes.editor.IContentWidget
-    | undefined = undefined;
+  activeContentWidgets: Array<monacoEditorTypes.editor.IContentWidget> = [];
   codeBitsMap: Map<string, MapObject> = new Map<string, MapObject>();
   reverseCodeBitsMap: Array<Array<string>> = new Array<Array<string>>();
 
   componentDidMount() {
-    const { highlightedCodePath, onClickBit, codeBits } = this.props;
-    if (highlightedCodePath) {
-      this.highlightAndScroll(highlightedCodePath);
+    const { highlightedCodePaths, onClickBit, codeBits } = this.props;
+    if (highlightedCodePaths && highlightedCodePaths.length) {
+      this.highlightAndScroll(highlightedCodePaths);
     }
     if (this.monacoRef && this.monacoRef.editor) {
       this.monacoRef.editor.onDidChangeCursorPosition(
@@ -60,23 +58,26 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         }
       );
     }
+    console.log(this.code);
   }
 
   componentWillMount = () => {
     const { codeBits } = this.props;
     this.mapCodeBitData(codeBits, 'CodeBit');
+    console.log(this.codeBitsMap);
   };
 
   shouldComponentUpdate = (nextProps: MonacoSurferPropTypes) => {
-    const { highlightedCodePath } = this.props;
+    const { highlightedCodePaths } = this.props;
     if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
       return false;
     }
     if (
-      nextProps.highlightedCodePath &&
-      nextProps.highlightedCodePath !== highlightedCodePath
+      nextProps.highlightedCodePaths &&
+      nextProps.highlightedCodePaths.length &&
+      nextProps.highlightedCodePaths !== highlightedCodePaths
     ) {
-      this.highlightAndScroll(nextProps.highlightedCodePath);
+      this.highlightAndScroll(nextProps.highlightedCodePaths);
       return false;
     }
     return true;
@@ -98,7 +99,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
           this.reverseCodeBitsMap[this.lineNumber] || [];
         this.reverseCodeBitsMap[this.lineNumber] = this.reverseCodeBitsMap[
           this.lineNumber
-        ].concat(new Array(singleLineCode.length + 1).fill(path));
+        ].concat(new Array(singleLineCode.length).fill(path));
         // Reverse map complete
 
         // Create forward map
@@ -115,11 +116,11 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
 
         if (type.start && !singleLineCodeIndex) {
           codeBitMapValue.start.lineNumber = this.lineNumber;
-          codeBitMapValue.start.columnNumber = initialReverseMap.length;
+          codeBitMapValue.start.columnNumber = initialReverseMap.length + 1;
         } else if (type.end) {
           codeBitMapValue.end.lineNumber = this.lineNumber;
           codeBitMapValue.end.columnNumber =
-            this.reverseCodeBitsMap[this.lineNumber].length - 1;
+            this.reverseCodeBitsMap[this.lineNumber].length + 1;
         }
         this.codeBitsMap.set(path, codeBitMapValue);
         // Forward map complete
@@ -139,13 +140,26 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     this.code += codeBit.start;
 
     // End recursive calls if children is of type string i.e. leaf node
-    if (typeof codeBit.children === 'string') {
-      this.handleMapping(codeBit.children, path, {
-        children: true,
-      });
+    if (
+      typeof codeBit.children === 'string' ||
+      typeof codeBit.children[0] === 'string'
+    ) {
+      if (typeof codeBit.children !== 'string') {
+        map(codeBit.children, (codeBitChildString: string) => {
+          this.handleMapping(codeBitChildString, path, {
+            children: true,
+          });
+          this.code += codeBitChildString;
+        });
+      } else {
+        this.handleMapping(codeBit.children, path, {
+          children: true,
+        });
+        this.code += codeBit.children;
+      }
+
       this.handleMapping(codeBit.end, path, { end: true });
 
-      this.code += codeBit.children;
       this.code += codeBit.end;
       return;
     }
@@ -158,45 +172,13 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     this.code += codeBit.end;
   };
 
-  highlightAndScroll = (highlightedCodePath: string) => {
+  highlightAndScroll = (highlightedCodePaths: Array<string> | string) => {
+    const { highlightOnly } = this.props;
+    if (this.activeContentWidgets && this.activeContentWidgets.length) {
+      this.removeExistingActionButtonWidgets();
+    }
+    if (!highlightOnly) this.scroll(highlightedCodePaths[0]);
     if (this.monacoRef && this.monacoRef.editor) {
-      const { addActionButtons, highlightOnly, codeBits } = this.props;
-      const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
-      if (!contentBitMapValue) return;
-
-      // Remove previously existing widget
-      if (this.activeContentWidget)
-        this.monacoRef.editor.removeContentWidget(this.activeContentWidget);
-
-      // Reveals code in center of screen
-      if (!highlightOnly)
-        this.monacoRef.editor.revealPositionInCenter({
-          lineNumber: contentBitMapValue.end.lineNumber,
-          column: contentBitMapValue.end.columnNumber,
-        });
-
-      // Add action button widget
-      let extractedBit: CodeBit | string;
-      const codePathForBitExtraction: Array<string> = highlightedCodePath.split(
-        '.'
-      );
-      codePathForBitExtraction.shift();
-
-      if (!codePathForBitExtraction.length) extractedBit = codeBits;
-      else extractedBit = get(codeBits, codePathForBitExtraction, 'NOT_FOUND');
-
-      const actionButtons = addActionButtons
-        ? this.getContentWidget(
-            contentBitMapValue,
-            addActionButtons(extractedBit, highlightedCodePath)
-          )
-        : null;
-
-      if (actionButtons) {
-        this.monacoRef.editor.addContentWidget(actionButtons);
-      }
-
-      // Gives api's for editor info
       const editorInfo = this.monacoRef.editor.getModel();
       let maxLines: number = 0,
         maxColumns: number = 0;
@@ -205,33 +187,83 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         maxColumns = editorInfo.getLineMaxColumn(editorInfo.getLineCount());
       }
 
-      // Add decorations for selected components
-      if (editorInfo) {
-        this.decorationId = this.monacoRef.editor.deltaDecorations(
-          this.decorationId,
-          [
-            {
-              range: new Range(1, 1, maxLines, maxColumns),
-              options: {
-                inlineClassName: 'dull',
-              },
-            },
-            {
-              range: new Range(
-                contentBitMapValue.start.lineNumber,
-                contentBitMapValue.start.columnNumber,
-                contentBitMapValue.end.lineNumber,
-                contentBitMapValue.end.columnNumber
-              ),
-              options: {
-                inlineClassName: 'selected-component',
-              },
-            },
-          ]
-        );
-      }
+      let newDecorationsArray = [
+        {
+          range: new Range(1, 1, maxLines, maxColumns),
+          options: {
+            inlineClassName: 'dull',
+          },
+        },
+      ];
+
+      map(highlightedCodePaths, (highlightedCodePath: string) => {
+        const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
+        if (!contentBitMapValue) return;
+
+        newDecorationsArray.push({
+          range: new Range(
+            contentBitMapValue.start.lineNumber,
+            contentBitMapValue.start.columnNumber,
+            contentBitMapValue.end.lineNumber,
+            contentBitMapValue.end.columnNumber
+          ),
+          options: {
+            inlineClassName: 'selected-component',
+          },
+        });
+        this.addActionButtonWidget(highlightedCodePath);
+      });
+      this.decorationId = this.monacoRef.editor.deltaDecorations(
+        this.decorationId,
+        newDecorationsArray
+      );
+
       return;
     }
+  };
+
+  scroll = (scrollCodePath: string) => {
+    const contentBitMapValue = this.codeBitsMap.get(scrollCodePath);
+    if (this.monacoRef && this.monacoRef.editor && contentBitMapValue)
+      this.monacoRef.editor.revealPositionInCenter({
+        lineNumber: contentBitMapValue.end.lineNumber,
+        column: contentBitMapValue.end.columnNumber,
+      });
+  };
+
+  addActionButtonWidget = (widgetCodePath: string) => {
+    const { addActionButtons, codeBits } = this.props;
+    const contentBitMapValue = this.codeBitsMap.get(widgetCodePath);
+
+    let extractedBit: CodeBit | string;
+    const codePathForBitExtraction: Array<string> = widgetCodePath.split('.');
+    codePathForBitExtraction.shift();
+
+    if (!codePathForBitExtraction.length) extractedBit = codeBits;
+    else extractedBit = get(codeBits, codePathForBitExtraction, 'NOT_FOUND');
+
+    const actionButtons =
+      addActionButtons && contentBitMapValue
+        ? this.getContentWidget(
+            contentBitMapValue,
+            addActionButtons(extractedBit, widgetCodePath)
+          )
+        : null;
+
+    if (this.monacoRef && this.monacoRef.editor && actionButtons) {
+      this.monacoRef.editor.addContentWidget(actionButtons);
+    }
+  };
+
+  removeExistingActionButtonWidgets = () => {
+    map(
+      this.activeContentWidgets,
+      (activeContentWidget: monacoEditorTypes.editor.IContentWidget) => {
+        if (this.monacoRef && this.monacoRef.editor) {
+          this.monacoRef.editor.removeContentWidget(activeContentWidget);
+        }
+      }
+    );
   };
 
   getContentWidget = (
@@ -264,7 +296,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
           };
         },
       };
-      this.activeContentWidget = contentWidget;
+      this.activeContentWidgets.push(contentWidget);
       return contentWidget;
     }
     return null;

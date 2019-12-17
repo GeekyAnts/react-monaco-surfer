@@ -22,7 +22,9 @@ yarn add react-monaco-surfer
 
 ## Using
 
-App.ts (check examples folder for better understanding)
+> We are using [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) as a peer dependencies. So, please `ENSURE` that you have [monaco-editor](https://github.com/microsoft/monaco-editor) and [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) to your project properly as specified in the respective docs before starting with `react-monaco-surfer`.
+
+`App.ts`(check examples folder for better understanding)
 
 ```
 import * as React from 'react';
@@ -37,7 +39,6 @@ import './index.css';
 
 const editorWillMount = (monaco: typeof monacoEditorTypes) => {
   // Handle editor starts mounting here!!
-  console.log('editorWillMount', monaco);
 };
 
 const onChange = (
@@ -45,7 +46,6 @@ const onChange = (
   event: monacoEditorTypes.editor.IModelContentChangedEvent
 ) => {
   // Handle on text changed in editor!!
-  console.log('onChange', newValue, event);
 };
 
 class App extends React.Component {
@@ -102,7 +102,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 ```
 
-codeBits.ts
+`codeBits.ts`(Syntax for the codeBits)
 
 ```
 export default {
@@ -193,3 +193,11 @@ and
   opacity: 1;
 }
 ```
+
+## Maintainers
+
+[ChandanCC](https://github.com/ChandanCC) and [Himanshu Satija](https://github.com/himanshu-satija)
+
+## License
+
+[MIT](https://github.com/GeekyAnts/react-monaco-surfer/blob/master/LICENSE)

@@ -20,9 +20,14 @@ or
 yarn add react-monaco-surfer
 ```
 
-## Using
+## Peer Dependencies
 
-> We are using [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) as a peer dependencies. So, please `ENSURE` that you have [monaco-editor](https://github.com/microsoft/monaco-editor) and [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor) to your project properly as specified in the respective docs before starting with `react-monaco-surfer`.
+- [react-monaco-editor](https://github.com/react-monaco-editor/react-monaco-editor)
+- [monaco-editor](https://github.com/microsoft/monaco-editor)
+
+Please `MAKE SURE` to add these to your project before starting with `react-monaco-surfer`.
+
+## Usage
 
 `App.ts`(check examples folder for better understanding)
 
@@ -50,7 +55,7 @@ const onChange = (
 
 class App extends React.Component {
   state = {
-    highlightedCodePath: undefined,
+    highlightedCodePaths: undefined,
     highlightOnly: false,
   };
 
@@ -67,11 +72,11 @@ class App extends React.Component {
     return (
       <MonacoSurfer
         codeBits={CodeBits}
-        highlightedCodePath={this.state.highlightedCodePath}
+        highlightedCodePaths={this.state.highlightedCodePaths}
         highlightOnly={this.state.highlightOnly}
         onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
           this.setState({
-            highlightedCodePath: codeBitPath,
+            highlightedCodePaths: codeBitPath,
             highlightOnly: true,
           });
         }}
@@ -154,25 +159,24 @@ export default {
 
 ## Properties
 
-All below mentioned properties are required except addActionButtons and highlightedCodePath
+All below mentioned properties are required except addActionButtons and highlightedCodePaths
 
 - `codeBits` Object in the format CodeBit (check `src/index.d.ts` for better understanding).
 
-- `highlightedCodePath` Mention the path to code-bit to highlight it (give `undefined`for no highlighting).
+- `highlightedCodePaths` Mention the paths to code-bit to highlight it (give `undefined` for no highlighting).
 
 - `highlightOnly` Boolean to prevent revealPositionInCenter, if not required.
 
 - `onClickBit` Handle clicks on any part of the code
-  `Params`
+  `Params :`
 
   - codeBit: Gives object for selected codeBit
   - codeBitPath: Gives path for selected codeBit
 
 - `reactMonacoProps` Can add all props of react-monaco-editor here.
 
-- `addActionButtons` Handle adding action buttons on selected part of the code
-  `Params`
-
+- `addActionButtons` Handle adding action buttons on selected part of the code.
+  `Params :`
   - codeBit: Gives object for selected codeBit
   - codeBitPath: Gives path for selected codeBit
 
@@ -193,6 +197,10 @@ and
   opacity: 1;
 }
 ```
+
+## Contributing
+
+Refer to [CONTRIBUTING.md](https://github.com/GeekyAnts/react-monaco-surfer/blob/master/CONTRIBUTING.md)
 
 ## Maintainers
 

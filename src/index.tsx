@@ -20,7 +20,6 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
   lineNumber: number = 1;
   code: string = '';
   monacoRef?: MonacoEditorTypes | null;
-  contentWidgetDomNode?: HTMLElement;
   decorationId: Array<string> = [];
   activeContentWidgets: Array<monacoEditorTypes.editor.IContentWidget> = [];
   codeBitsMap: Map<string, MapObject> = new Map<string, MapObject>();
@@ -38,7 +37,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         ) => {
           const path = this.reverseCodeBitsMap[
             positionProps.position.lineNumber
-          ][positionProps.position.column - 1];
+          ][positionProps.position.column - 2];
 
           let extractedBit: CodeBit;
 
@@ -48,23 +47,20 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
           if (!codePathForBitExtraction.length) extractedBit = codeBits;
           else
             extractedBit = get(codeBits, codePathForBitExtraction, 'NOT_FOUND');
-
           onClickBit(
             extractedBit,
             this.reverseCodeBitsMap[positionProps.position.lineNumber][
-              positionProps.position.column - 1
+              positionProps.position.column - 2
             ]
           );
         }
       );
     }
-    console.log(this.code);
   }
 
   componentWillMount = () => {
     const { codeBits } = this.props;
     this.mapCodeBitData(codeBits, 'CodeBit');
-    console.log(this.codeBitsMap);
   };
 
   shouldComponentUpdate = (nextProps: MonacoSurferPropTypes) => {
@@ -196,23 +192,26 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         },
       ];
 
-      map(highlightedCodePaths, (highlightedCodePath: string) => {
-        const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
-        if (!contentBitMapValue) return;
+      map(
+        highlightedCodePaths,
+        (highlightedCodePath: string, widgetIndex: number) => {
+          const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
+          if (!contentBitMapValue) return;
 
-        newDecorationsArray.push({
-          range: new Range(
-            contentBitMapValue.start.lineNumber,
-            contentBitMapValue.start.columnNumber,
-            contentBitMapValue.end.lineNumber,
-            contentBitMapValue.end.columnNumber
-          ),
-          options: {
-            inlineClassName: 'selected-component',
-          },
-        });
-        this.addActionButtonWidget(highlightedCodePath);
-      });
+          newDecorationsArray.push({
+            range: new Range(
+              contentBitMapValue.start.lineNumber,
+              contentBitMapValue.start.columnNumber,
+              contentBitMapValue.end.lineNumber,
+              contentBitMapValue.end.columnNumber
+            ),
+            options: {
+              inlineClassName: 'selected-component',
+            },
+          });
+          this.addActionButtonWidget(highlightedCodePath, widgetIndex);
+        }
+      );
       this.decorationId = this.monacoRef.editor.deltaDecorations(
         this.decorationId,
         newDecorationsArray
@@ -231,7 +230,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       });
   };
 
-  addActionButtonWidget = (widgetCodePath: string) => {
+  addActionButtonWidget = (widgetCodePath: string, widgetIndex: number) => {
     const { addActionButtons, codeBits } = this.props;
     const contentBitMapValue = this.codeBitsMap.get(widgetCodePath);
 
@@ -246,10 +245,10 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       addActionButtons && contentBitMapValue
         ? this.getContentWidget(
             contentBitMapValue,
-            addActionButtons(extractedBit, widgetCodePath)
+            addActionButtons(extractedBit, widgetCodePath),
+            widgetIndex
           )
         : null;
-
     if (this.monacoRef && this.monacoRef.editor && actionButtons) {
       this.monacoRef.editor.addContentWidget(actionButtons);
     }
@@ -264,24 +263,23 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         }
       }
     );
+    this.activeContentWidgets = [];
   };
 
   getContentWidget = (
     contentBitMapValue: MapObject,
-    MyButtonWidget: React.ElementType<any> | null
+    MyButtonWidget: React.ElementType<any> | null,
+    widgetIndex: number
   ) => {
     if (MyButtonWidget) {
       const contentWidget: monacoEditorTypes.editor.IContentWidget = {
         getId: function() {
-          return 'my.content.widget';
+          return 'my.content.widget' + widgetIndex;
         },
         getDomNode: () => {
-          if (!this.contentWidgetDomNode) {
-            var newDomNode = document.createElement('div');
-            ReactDOM.hydrate(<MyButtonWidget />, newDomNode);
-            this.contentWidgetDomNode = newDomNode;
-          }
-          return this.contentWidgetDomNode;
+          var newDomNode = document.createElement('div');
+          ReactDOM.hydrate(<MyButtonWidget />, newDomNode);
+          return newDomNode;
         },
         getPosition: function() {
           return {

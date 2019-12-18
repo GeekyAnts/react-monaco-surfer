@@ -19,7 +19,7 @@ const onChange = (
 
 class App extends React.Component {
   state = {
-    highlightedCodePath: [
+    highlightedCodePaths: [
       'CodeBit.children.1.children.0.children.0',
       'CodeBit.children.1.children.1.children.0',
     ],
@@ -38,11 +38,11 @@ class App extends React.Component {
     return (
       <MonacoSurfer
         codeBits={CodeBits}
-        highlightedCodePaths={this.state.highlightedCodePath}
+        highlightedCodePaths={this.state.highlightedCodePaths}
         highlightOnly={this.state.highlightOnly}
         onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
           this.setState({
-            highlightedCodePath: [codeBitPath],
+            highlightedCodePaths: [codeBitPath],
             highlightOnly: true,
           });
         }}

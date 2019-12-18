@@ -55,7 +55,7 @@ const onChange = (
 
 class App extends React.Component {
   state = {
-    highlightedCodePath: undefined,
+    highlightedCodePaths: undefined,
     highlightOnly: false,
   };
 
@@ -72,11 +72,11 @@ class App extends React.Component {
     return (
       <MonacoSurfer
         codeBits={CodeBits}
-        highlightedCodePath={this.state.highlightedCodePath}
+        highlightedCodePaths={this.state.highlightedCodePaths}
         highlightOnly={this.state.highlightOnly}
         onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
           this.setState({
-            highlightedCodePath: codeBitPath,
+            highlightedCodePaths: codeBitPath,
             highlightOnly: true,
           });
         }}
@@ -159,11 +159,11 @@ export default {
 
 ## Properties
 
-All below mentioned properties are required except addActionButtons and highlightedCodePath
+All below mentioned properties are required except addActionButtons and highlightedCodePaths
 
 - `codeBits` Object in the format CodeBit (check `src/index.d.ts` for better understanding).
 
-- `highlightedCodePath` Mention the path to code-bit to highlight it (give `undefined` for no highlighting).
+- `highlightedCodePaths` Mention the paths to code-bit to highlight it (give `undefined` for no highlighting).
 
 - `highlightOnly` Boolean to prevent revealPositionInCenter, if not required.
 

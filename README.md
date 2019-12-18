@@ -29,7 +29,7 @@ Please `MAKE SURE` to add these to your project before starting with `react-mona
 
 ## Usage
 
-`App.ts`(check examples folder for better understanding)
+`App.ts`(_Check examples folder for better understanding_)
 
 ```
 import * as React from 'react';
@@ -56,7 +56,6 @@ const onChange = (
 class App extends React.Component {
   state = {
     highlightedCodePaths: undefined,
-    highlightOnly: false,
   };
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -73,11 +72,10 @@ class App extends React.Component {
       <MonacoSurfer
         codeBits={CodeBits}
         highlightedCodePaths={this.state.highlightedCodePaths}
-        highlightOnly={this.state.highlightOnly}
+        scrollToPath={PATH}
         onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
           this.setState({
             highlightedCodePaths: codeBitPath,
-            highlightOnly: true,
           });
         }}
         addActionButtons={(
@@ -107,7 +105,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 ```
 
-`codeBits.ts`(Syntax for the codeBits)
+`codeBits.ts`(_Syntax for the codeBits_)
 
 ```
 export default {
@@ -159,26 +157,28 @@ export default {
 
 ## Properties
 
-All below mentioned properties are required except addActionButtons and highlightedCodePaths
+- `codeBits`:**MANDATORY** Object in the format CodeBit (check `src/index.d.ts` for better understanding).
 
-- `codeBits` Object in the format CodeBit (check `src/index.d.ts` for better understanding).
+- `highlightedCodePaths`:**OPTIONAL** Mention the paths to code-bit to highlight it.
 
-- `highlightedCodePaths` Mention the paths to code-bit to highlight it (give `undefined` for no highlighting).
+- `scrollToPath`:**OPTIONAL** Path to scroll to a particular component.
 
-- `highlightOnly` Boolean to prevent revealPositionInCenter, if not required.
+- `onClickBit`: **OPTIONAL** Handle clicks on any part of the code.
+  **_Params_ :**
 
-- `onClickBit` Handle clicks on any part of the code
-  `Params :`
+  - codeBit: Gives object for selected codeBit.
+  - codeBitPath: Gives path for selected codeBit.
 
-  - codeBit: Gives object for selected codeBit
-  - codeBitPath: Gives path for selected codeBit
+- `reactMonacoProps`:**MANDATORY** Can add all props of react-monaco-editor here.
 
-- `reactMonacoProps` Can add all props of react-monaco-editor here.
+- `addActionButtons`:**OPTIONAL** Handle adding action buttons on selected part of the code.
+  **_Params_ :**
 
-- `addActionButtons` Handle adding action buttons on selected part of the code.
-  `Params :`
-  - codeBit: Gives object for selected codeBit
-  - codeBitPath: Gives path for selected codeBit
+  - codeBit: Gives object for selected codeBit.
+  - codeBitPath: Gives path for selected codeBit.
+    **_Return_:**
+
+  - React Element, [check example]("./example/index.tsx")
 
 ## Required CSS classes
 

@@ -26,11 +26,19 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
   reverseCodeBitsMap: Array<Array<string>> = new Array<Array<string>>();
 
   componentDidMount() {
-    const { highlightedCodePaths, onClickBit, codeBits } = this.props;
+    const {
+      highlightedCodePaths,
+      onClickBit,
+      codeBits,
+      scrollToPath,
+    } = this.props;
+
     if (highlightedCodePaths && highlightedCodePaths.length) {
-      this.highlightAndScroll(highlightedCodePaths);
+      this.highlightAndAddActionButtons(highlightedCodePaths);
     }
-    if (this.monacoRef && this.monacoRef.editor) {
+    if (scrollToPath) this.scroll(scrollToPath);
+
+    if (this.monacoRef && this.monacoRef.editor && onClickBit) {
       this.monacoRef.editor.onDidChangeCursorPosition(
         (
           positionProps: monacoEditorTypes.editor.ICursorPositionChangedEvent
@@ -39,7 +47,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
             positionProps.position.lineNumber
           ][positionProps.position.column - 2];
 
-          let extractedBit: CodeBit;
+          let extractedBit: CodeBit | string;
 
           const codePathForBitExtraction: Array<string> = path.split('.');
           codePathForBitExtraction.shift();
@@ -64,19 +72,25 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
   };
 
   shouldComponentUpdate = (nextProps: MonacoSurferPropTypes) => {
-    const { highlightedCodePaths } = this.props;
+    const { highlightedCodePaths, scrollToPath } = this.props;
+    let updateComponent = true;
     if (JSON.stringify(this.props) === JSON.stringify(nextProps)) {
-      return false;
+      updateComponent = false;
+      return updateComponent;
     }
     if (
       nextProps.highlightedCodePaths &&
       nextProps.highlightedCodePaths.length &&
       nextProps.highlightedCodePaths !== highlightedCodePaths
     ) {
-      this.highlightAndScroll(nextProps.highlightedCodePaths);
-      return false;
+      this.highlightAndAddActionButtons(nextProps.highlightedCodePaths);
+      updateComponent = false;
     }
-    return true;
+    if (nextProps.scrollToPath && nextProps.scrollToPath !== scrollToPath) {
+      this.scroll(nextProps.scrollToPath);
+      updateComponent = false;
+    }
+    return updateComponent;
   };
 
   /*
@@ -168,12 +182,12 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     this.code += codeBit.end;
   };
 
-  highlightAndScroll = (highlightedCodePaths: Array<string> | string) => {
-    const { highlightOnly } = this.props;
+  highlightAndAddActionButtons = (
+    highlightedCodePaths: Array<string> | string
+  ) => {
     if (this.activeContentWidgets && this.activeContentWidgets.length) {
       this.removeExistingActionButtonWidgets();
     }
-    if (!highlightOnly) this.scroll(highlightedCodePaths[0]);
     if (this.monacoRef && this.monacoRef.editor) {
       const editorInfo = this.monacoRef.editor.getModel();
       let maxLines: number = 0,
@@ -192,26 +206,26 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         },
       ];
 
-      map(
-        highlightedCodePaths,
-        (highlightedCodePath: string, widgetIndex: number) => {
-          const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
-          if (!contentBitMapValue) return;
-
-          newDecorationsArray.push({
-            range: new Range(
-              contentBitMapValue.start.lineNumber,
-              contentBitMapValue.start.columnNumber,
-              contentBitMapValue.end.lineNumber,
-              contentBitMapValue.end.columnNumber
-            ),
-            options: {
-              inlineClassName: 'selected-component',
-            },
-          });
-          this.addActionButtonWidget(highlightedCodePath, widgetIndex);
-        }
-      );
+      if (typeof highlightedCodePaths !== 'string') {
+        map(
+          highlightedCodePaths,
+          (highlightedCodePath: string, widgetIndex: number) =>
+            this.fillNewDecorationsArray(
+              highlightedCodePath,
+              widgetIndex,
+              newDecorationsArray
+            )
+        );
+      } else {
+        this.fillNewDecorationsArray(
+          highlightedCodePaths,
+          0,
+          newDecorationsArray
+        );
+      }
+      if (newDecorationsArray.length === 1) {
+        newDecorationsArray = [];
+      }
       this.decorationId = this.monacoRef.editor.deltaDecorations(
         this.decorationId,
         newDecorationsArray
@@ -219,6 +233,28 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
 
       return;
     }
+  };
+
+  fillNewDecorationsArray = (
+    highlightedCodePath: string,
+    widgetIndex: number,
+    newDecorationsArray: Array<monacoEditorTypes.editor.IModelDeltaDecoration>
+  ) => {
+    const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
+    if (!contentBitMapValue) return;
+
+    newDecorationsArray.push({
+      range: new Range(
+        contentBitMapValue.start.lineNumber,
+        contentBitMapValue.start.columnNumber,
+        contentBitMapValue.end.lineNumber,
+        contentBitMapValue.end.columnNumber
+      ),
+      options: {
+        inlineClassName: 'selected-component',
+      },
+    });
+    this.addActionButtonWidget(highlightedCodePath, widgetIndex);
   };
 
   scroll = (scrollCodePath: string) => {
@@ -274,7 +310,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     if (MyButtonWidget) {
       const contentWidget: monacoEditorTypes.editor.IContentWidget = {
         getId: function() {
-          return 'my.content.widget' + widgetIndex;
+          return 'my.content.widget.' + widgetIndex;
         },
         getDomNode: () => {
           var newDomNode = document.createElement('div');

@@ -29,11 +29,7 @@ export default {
                   start: '\t\t\t<Text>',
                   end: '</Text>\n',
                   children: [
-                    {
-                      start: '',
-                      end: '',
-                      children: ['Enter some text here'],
-                    },
+                    { start: '', end: '', children: 'Enter some text here' },
                   ],
                 },
                 {

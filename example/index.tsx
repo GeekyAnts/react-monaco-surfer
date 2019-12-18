@@ -19,11 +19,8 @@ const onChange = (
 
 class App extends React.Component {
   state = {
-    highlightedCodePaths: [
-      'CodeBit.children.1.children.0.children.0',
-      'CodeBit.children.1.children.1.children.0',
-    ],
-    highlightOnly: false,
+    highlightedCodePaths: 'CodeBit.children.1.children.0',
+    scrollToPath: 'CodeBit.children.1.children.0',
   };
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -36,43 +33,45 @@ class App extends React.Component {
   }
   render() {
     return (
-      <MonacoSurfer
-        codeBits={CodeBits}
-        highlightedCodePaths={this.state.highlightedCodePaths}
-        highlightOnly={this.state.highlightOnly}
-        onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
-          this.setState({
-            highlightedCodePaths: [codeBitPath],
-            highlightOnly: true,
-          });
-        }}
-        addActionButtons={(
-          codeBit: SurferTypes.CodeBit,
-          codeBitPath: string
-        ) => {
-          if (
-            codeBitPath === 'CodeBit.children.1.children.0.children.0' ||
-            codeBitPath === 'CodeBit.children.1.children.1.children.0'
-          )
-            return () => (
-              <div className="btn-container">
-                <button onClick={() => {}} className="action-btn">
-                  <text className="btn-text">Export</text>
-                </button>
-                <button onClick={() => {}} className="action-btn-right">
-                  <text className="btn-text">Refractor</text>
-                </button>
-              </div>
-            );
-          return null;
-        }}
-        reactMonacoProps={{
-          onChange: onChange,
-          editorWillMount: editorWillMount,
-          width: '100%',
-          height: '100vh',
-        }}
-      ></MonacoSurfer>
+      <React.Fragment>
+        <MonacoSurfer
+          codeBits={CodeBits}
+          highlightedCodePaths={this.state.highlightedCodePaths}
+          scrollToPath={this.state.scrollToPath}
+          onClickBit={(codeBit: SurferTypes.CodeBit, codeBitPath: string) => {
+            this.setState({
+              highlightedCodePaths: codeBitPath,
+              // scrollToPath: codeBitPath,
+            });
+          }}
+          addActionButtons={(
+            codeBit: SurferTypes.CodeBit,
+            codeBitPath: string
+          ) => {
+            if (
+              codeBitPath === 'CodeBit.children.1.children.0.children.0' ||
+              codeBitPath === 'CodeBit.children.1.children.1.children.0'
+            )
+              return () => (
+                <div className="btn-container">
+                  <button onClick={() => {}} className="action-btn">
+                    <text className="btn-text">Export</text>
+                  </button>
+                  <button onClick={() => {}} className="action-btn-right">
+                    <text className="btn-text">Refractor</text>
+                  </button>
+                </div>
+              );
+            return null;
+          }}
+          reactMonacoProps={{
+            onChange: onChange,
+            editorWillMount: editorWillMount,
+            width: '100%',
+            height: '100vh',
+          }}
+        ></MonacoSurfer>
+      </React.Fragment>
     );
   }
 }

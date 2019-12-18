@@ -33,17 +33,14 @@ export interface MonacoSurferPropTypes {
   */
   highlightedCodePaths?: Array<string> | string | null | undefined;
 
-  /*
-    Boolean to prevent revealPositionInCenter, if not required
-  */
-  highlightOnly: boolean;
+  scrollToPath?: string;
 
   /*
     Handle clicks on any part of the code
       - codeBit: Gives object for selected codeBit
       - codeBitPath: Gives path for selected codeBit
   */
-  onClickBit: (codeBit: CodeBit | string, codeBitPath: string) => void;
+  onClickBit?: (codeBit: CodeBit | string, codeBitPath: string) => void;
 
   /*
     Add all props of react-monaco-editor here

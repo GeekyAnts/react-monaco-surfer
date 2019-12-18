@@ -198,19 +198,9 @@ and
 }
 ```
 
-## Development Setup
+## Contributing
 
-```
-git clone https://github.com/GeekyAnts/react-monaco-surfer.git
-cd react-monaco-surfer
-yarn
-yarn start
-cd examples
-yarn
-yarn start
-```
-
-This way you can make changes in the root folder(react-monaco-surfer) and test your changes on the project in examples folder.
+Refer to [CONTRIBUTING.md](https://github.com/GeekyAnts/react-monaco-surfer/blob/master/CONTRIBUTING.md)
 
 ## Maintainers
 

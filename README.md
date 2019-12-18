@@ -10,13 +10,13 @@ A wrapper around [react-monaco-editor](https://github.com/react-monaco-editor/re
 
 ## Installation
 
-```
+```Shell
 npm install react-monaco-surfer
 ```
 
 or
 
-```
+```Shell
 yarn add react-monaco-surfer
 ```
 

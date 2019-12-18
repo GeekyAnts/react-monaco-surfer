@@ -6,13 +6,13 @@ Thanks for your interest in `react-monaco-surfer`! You are very welcome to contr
 
 - First, clone the project
 
-  ```
+  ```Shell
   git clone https://github.com/GeekyAnts/react-monaco-surfer.git
   ```
 
 - Then follow the steps to start contributing
 
-  ```
+  ```Shell
   cd react-monaco-surfer
   yarn
   yarn start

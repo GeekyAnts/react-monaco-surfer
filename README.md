@@ -31,7 +31,7 @@ Please `MAKE SURE` to add these to your project before starting with `react-mona
 
 `App.ts`(check examples folder for better understanding)
 
-```
+```TypeScript
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import MonacoSurfer from 'react-monaco-surfer';
@@ -109,7 +109,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 
 `codeBits.ts`(Syntax for the codeBits)
 
-```
+```TypeScript
 export default {
   start: '<View>\n',
   end: '</View>\n',
@@ -182,7 +182,7 @@ All below mentioned properties are required except addActionButtons and highligh
 
 ## Required CSS classes
 
-```
+```CSS
 .dull{
   // any styles for un-highlighted text
   opacity: 0.4;
@@ -191,7 +191,7 @@ All below mentioned properties are required except addActionButtons and highligh
 
 and
 
-```
+```CSS
 .selected-component{
   // any styles for highlighted text
   opacity: 1;

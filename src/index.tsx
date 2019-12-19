@@ -33,7 +33,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       scrollToPath,
     } = this.props;
 
-    if (highlightedCodePaths && highlightedCodePaths.length) {
+    if (highlightedCodePaths) {
       this.highlightAndAddActionButtons(highlightedCodePaths);
     }
     if (scrollToPath) this.scroll(scrollToPath);
@@ -80,7 +80,6 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     }
     if (
       nextProps.highlightedCodePaths &&
-      nextProps.highlightedCodePaths.length &&
       nextProps.highlightedCodePaths !== highlightedCodePaths
     ) {
       this.highlightAndAddActionButtons(nextProps.highlightedCodePaths);
@@ -225,6 +224,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       }
       if (newDecorationsArray.length === 1) {
         newDecorationsArray = [];
+        throw new Error('Unable to find any of highlightedCodePaths in map');
       }
       this.decorationId = this.monacoRef.editor.deltaDecorations(
         this.decorationId,
@@ -241,7 +241,9 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     newDecorationsArray: Array<monacoEditorTypes.editor.IModelDeltaDecoration>
   ) => {
     const contentBitMapValue = this.codeBitsMap.get(highlightedCodePath);
-    if (!contentBitMapValue) return;
+    if (!contentBitMapValue) {
+      throw new Error(`Unable to find ${highlightedCodePath} path in map`);
+    }
 
     newDecorationsArray.push({
       range: new Range(
@@ -259,17 +261,19 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
 
   scroll = (scrollCodePath: string) => {
     const contentBitMapValue = this.codeBitsMap.get(scrollCodePath);
-    if (this.monacoRef && this.monacoRef.editor && contentBitMapValue)
+    if (this.monacoRef && this.monacoRef.editor && contentBitMapValue) {
       this.monacoRef.editor.revealPositionInCenter({
         lineNumber: contentBitMapValue.end.lineNumber,
         column: contentBitMapValue.end.columnNumber,
       });
+    } else if (!contentBitMapValue) {
+      throw new Error(`Unable to find ${scrollCodePath} in map.`);
+    }
   };
 
   addActionButtonWidget = (widgetCodePath: string, widgetIndex: number) => {
     const { addActionButtons, codeBits } = this.props;
     const contentBitMapValue = this.codeBitsMap.get(widgetCodePath);
-
     let extractedBit: CodeBit | string;
     const codePathForBitExtraction: Array<string> = widgetCodePath.split('.');
     codePathForBitExtraction.shift();

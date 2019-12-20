@@ -5,7 +5,12 @@ import { Range } from 'monaco-editor';
 import map from 'lodash/map';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
-import { MonacoSurferPropTypes, MapObject, CodeBit, MapType } from './index.d.';
+import {
+  MonacoSurferPropTypes,
+  MapObject,
+  CodeBit,
+  MapType,
+} from './interfaces';
 import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';
 import MonacoEditorTypes from 'react-monaco-editor/src/index';
 

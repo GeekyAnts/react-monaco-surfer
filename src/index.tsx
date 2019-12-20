@@ -5,7 +5,7 @@ import { Range } from 'monaco-editor';
 import map from 'lodash/map';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
-import { MonacoSurferPropTypes, MapObject, CodeBit, MapType } from './index.d.';
+import { MonacoSurferPropTypes, MapObject, CodeBit, MapType } from './index.d';
 import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';
 import MonacoEditorTypes from 'react-monaco-editor/src/index';
 
@@ -149,8 +149,8 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     Recursive calls for mapping codeBits
   */
   mapCodeBitData = (codeBit: CodeBit, path: string) => {
-    this.handleMapping(codeBit.start, path, { start: true });
-    this.code += codeBit.start;
+    this.handleMapping(codeBit.start || '', path, { start: true });
+    this.code += codeBit.start || '';
 
     // End recursive calls if children is of type string i.e. leaf node
     if (typeof codeBit.children === 'string') {
@@ -159,9 +159,9 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       });
       this.code += codeBit.children;
 
-      this.handleMapping(codeBit.end, path, { end: true });
+      this.handleMapping(codeBit.end || '', path, { end: true });
 
-      this.code += codeBit.end;
+      this.code += codeBit.end || '';
       return;
     }
 
@@ -176,8 +176,8 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       }
     });
 
-    this.handleMapping(codeBit.end, path, { end: true });
-    this.code += codeBit.end;
+    this.handleMapping(codeBit.end || '', path, { end: true });
+    this.code += codeBit.end || '';
   };
 
   highlightAndAddActionButtons = (

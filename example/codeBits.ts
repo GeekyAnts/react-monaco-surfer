@@ -3,8 +3,6 @@ export default {
   end: '',
   children: [
     {
-      start: '',
-      end: '',
       children: [
         'import React from "react";\n',
         'import { View, Text } from "react-native";\n\n',

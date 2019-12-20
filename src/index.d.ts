@@ -3,6 +3,7 @@ import { MonacoEditorProps } from 'react-monaco-editor/src/index';
 export interface CodeBit {
   start: string;
   end: string;
+  data?: any;
   children: Array<CodeBit | string> | string;
 }
 

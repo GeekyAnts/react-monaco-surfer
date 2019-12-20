@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import MonacoSurfer from '../.';
-import * as SurferTypes from '../dist/index.d.';
+import * as SurferTypes from '../src/interfaces';
 import './index.css';
 import CodeBits from './codeBits';
 import * as monacoEditorTypes from 'monaco-editor/esm/vs/editor/editor.api';

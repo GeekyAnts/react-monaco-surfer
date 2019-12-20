@@ -32,7 +32,6 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       codeBits,
       scrollToPath,
     } = this.props;
-
     if (highlightedCodePaths) {
       this.highlightAndAddActionButtons(highlightedCodePaths);
     }
@@ -43,9 +42,13 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
         (
           positionProps: monacoEditorTypes.editor.ICursorPositionChangedEvent
         ) => {
-          const path = this.reverseCodeBitsMap[
-            positionProps.position.lineNumber
-          ][positionProps.position.column - 2];
+          const path =
+            this.reverseCodeBitsMap[positionProps.position.lineNumber][
+              positionProps.position.column - 2
+            ] ||
+            this.reverseCodeBitsMap[positionProps.position.lineNumber][
+              positionProps.position.column - 1
+            ];
 
           let extractedBit: CodeBit | string;
 
@@ -55,12 +58,7 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
           if (!codePathForBitExtraction.length) extractedBit = codeBits;
           else
             extractedBit = get(codeBits, codePathForBitExtraction, 'NOT_FOUND');
-          onClickBit(
-            extractedBit,
-            this.reverseCodeBitsMap[positionProps.position.lineNumber][
-              positionProps.position.column - 2
-            ]
-          );
+          onClickBit(extractedBit, path);
         }
       );
     }
@@ -130,6 +128,12 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
           codeBitMapValue.end.lineNumber = this.lineNumber;
           codeBitMapValue.end.columnNumber =
             this.reverseCodeBitsMap[this.lineNumber].length + 1;
+        } else if (type.children && singleLineCode.length) {
+          codeBitMapValue.start.lineNumber = this.lineNumber;
+          codeBitMapValue.start.columnNumber = initialReverseMap.length + 1;
+          codeBitMapValue.end.lineNumber = this.lineNumber;
+          codeBitMapValue.end.columnNumber =
+            initialReverseMap.length + singleLineCode.length + 1;
         }
         this.codeBitsMap.set(path, codeBitMapValue);
         // Forward map complete
@@ -149,23 +153,11 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
     this.code += codeBit.start;
 
     // End recursive calls if children is of type string i.e. leaf node
-    if (
-      typeof codeBit.children === 'string' ||
-      typeof codeBit.children[0] === 'string'
-    ) {
-      if (typeof codeBit.children !== 'string') {
-        map(codeBit.children, (codeBitChildString: string) => {
-          this.handleMapping(codeBitChildString, path, {
-            children: true,
-          });
-          this.code += codeBitChildString;
-        });
-      } else {
-        this.handleMapping(codeBit.children, path, {
-          children: true,
-        });
-        this.code += codeBit.children;
-      }
+    if (typeof codeBit.children === 'string') {
+      this.handleMapping(codeBit.children, path, {
+        children: true,
+      });
+      this.code += codeBit.children;
 
       this.handleMapping(codeBit.end, path, { end: true });
 
@@ -173,8 +165,15 @@ export default class MonacoSurfer extends Component<MonacoSurferPropTypes> {
       return;
     }
 
-    map(codeBit.children, (child: CodeBit, childIndex: number) => {
-      this.mapCodeBitData(child, path + '.children.' + childIndex);
+    map(codeBit.children, (child: CodeBit | string, childIndex: number) => {
+      if (typeof child === 'string') {
+        this.handleMapping(child, path + '.children.' + childIndex, {
+          children: true,
+        });
+        this.code += child;
+      } else {
+        this.mapCodeBitData(child, path + '.children.' + childIndex);
+      }
     });
 
     this.handleMapping(codeBit.end, path, { end: true });

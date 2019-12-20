@@ -19,8 +19,11 @@ const onChange = (
 
 class App extends React.Component {
   state = {
-    highlightedCodePaths: 'CodeBit.children.1.children.0',
-    scrollToPath: 'CodeBit.children.1.children.0',
+    highlightedCodePaths: [
+      'CodeBit.children.1.children.0',
+      'CodeBit.children.0.children.1',
+    ],
+    scrollToPath: '',
   };
 
   shouldComponentUpdate(nextProps, nextState) {
